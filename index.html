@@ -2,60 +2,127 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Mini Instagram Privado</title>
+  <title>colimbo://mini-instagram</title>
   <style>
-    body { font-family: system-ui, sans-serif; background:#fafafa; padding:20px; max-width:800px; margin:auto; }
-    h1 { text-align:center; }
+    body {
+      font-family: "JetBrains Mono", "Consolas", monospace;
+      background:#0d0d0d;
+      color:#00ff9c;
+      padding:20px;
+      max-width:900px;
+      margin:auto;
+    }
 
-    /* Caja de login */
+    h1 {
+      text-align:center;
+      color:#00ff9c;
+      margin-bottom:30px;
+      letter-spacing:2px;
+    }
+
+    /* LOGIN */
     #loginBox {
-      max-width:300px; margin:80px auto; padding:20px;
-      background:white; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.1);
+      max-width:320px;
+      margin:80px auto;
+      padding:25px;
+      background:#111;
+      border:1px solid #00ff9c;
+      border-radius:8px;
+      box-shadow:0 0 15px #00ff9c33;
     }
+
     #loginBox input {
-      width:100%; padding:10px; margin:10px 0; border-radius:5px; border:1px solid #ccc;
+      width:100%;
+      padding:10px;
+      margin:10px 0;
+      background:#000;
+      color:#00ff9c;
+      border:1px solid #00ff9c55;
+      border-radius:5px;
     }
+
     #loginBox button {
-      width:100%; padding:10px; background:#0095f6; color:white; border:none; border-radius:5px;
+      width:100%;
+      padding:10px;
+      background:#00ff9c;
+      color:#000;
+      border:none;
+      border-radius:5px;
+      cursor:pointer;
+      font-weight:bold;
+    }
+
+    #loginBox button:hover {
+      background:#00cc7a;
+    }
+
+    /* APP */
+    #top {
+      display:flex;
+      gap:10px;
+      justify-content:center;
+      margin-bottom:20px;
+      flex-wrap:wrap;
+    }
+
+    button, input[type="file"] {
+      padding:8px 12px;
+      border-radius:6px;
+      background:#111;
+      color:#00ff9c;
+      border:1px solid #00ff9c55;
       cursor:pointer;
     }
-    #loginBox button:hover { background:#0077c8; }
 
-    /* Galería */
-    #top { display:flex; gap:10px; justify-content:center; margin-bottom:20px; flex-wrap:wrap; }
-    button, input[type="file"] {
-      padding:8px 12px; border-radius:8px; border:1px solid #ddd; background:white; cursor:pointer;
+    button:hover {
+      background:#00ff9c;
+      color:#000;
     }
-    button { background:#0095f6; color:white; border:none; }
-    button:hover { background:#0077c8; }
 
-    #gallery { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; }
-    .card { background:white; border:1px solid #ddd; border-radius:12px; padding:8px; }
-    .card img { width:200px; height:200px; object-fit:cover; border-radius:10px; display:block; }
+    #gallery {
+      display:grid;
+      grid-template-columns:repeat(auto-fill, minmax(200px, 1fr));
+      gap:15px;
+      margin-top:20px;
+    }
+
+    .card {
+      background:#111;
+      border:1px solid #00ff9c33;
+      border-radius:10px;
+      padding:8px;
+      box-shadow:0 0 10px #00ff9c22;
+    }
+
+    .card img {
+      width:100%;
+      height:200px;
+      object-fit:cover;
+      border-radius:8px;
+    }
   </style>
 </head>
 <body>
 
-<h1>Mini Instagram Privado</h1>
+<h1>colimbo://mini-instagram</h1>
 
 <!-- LOGIN -->
 <div id="loginBox" style="display:none;">
-  <h2>Iniciar sesión</h2>
-  <input id="user" placeholder="Usuario">
-  <input id="pass" type="password" placeholder="Contraseña">
-  <button onclick="login()">Entrar</button>
-  <p id="msg" style="color:red;"></p>
+  <h2>login</h2>
+  <input id="user" placeholder="usuario">
+  <input id="pass" type="password" placeholder="contraseña">
+  <button onclick="login()">entrar</button>
+  <p id="msg" style="color:#ff4d4d;"></p>
 </div>
 
 <!-- APP -->
 <div id="app" style="display:none;">
   <div id="top">
     <input type="file" id="fileInput" accept="image/*">
-    <button onclick="upload()">Subir foto</button>
-    <button onclick="logout()">Cerrar sesión</button>
+    <button onclick="upload()">subir</button>
+    <button onclick="logout()">salir</button>
   </div>
 
-  <h2>Galería</h2>
   <div id="gallery"></div>
 </div>
 
@@ -63,15 +130,15 @@
 /* -------------------------
    CONFIGURACIÓN
 -------------------------- */
-const USER = "colimbo";   // usuario inventado
-const PASS = "7600";      // contraseña inventada
+const USER = "colimbo";
+const PASS = "7600";
 
 const username = "TU_USUARIO";  // <-- cámbialo
 const repo = "TU_REPO";         // <-- cámbialo
 const branch = "main";
 
 /* -------------------------
-   SISTEMA DE LOGIN
+   LOGIN
 -------------------------- */
 function checkLogin() {
   if (localStorage.getItem("logged") === "yes") {
@@ -92,7 +159,7 @@ function login() {
     localStorage.setItem("logged", "yes");
     checkLogin();
   } else {
-    document.getElementById("msg").textContent = "Credenciales incorrectas";
+    document.getElementById("msg").textContent = "acceso denegado";
   }
 }
 
@@ -102,11 +169,11 @@ function logout() {
 }
 
 /* -------------------------
-   TOKEN DE GITHUB
+   TOKEN GITHUB
 -------------------------- */
 let token = localStorage.getItem("github_token");
 if (!token) {
-  token = prompt("Introduce tu token de GitHub (PAT)");
+  token = prompt("token github:");
   if (token) localStorage.setItem("github_token", token);
 }
 
@@ -115,7 +182,7 @@ if (!token) {
 -------------------------- */
 async function upload() {
   const file = document.getElementById("fileInput").files[0];
-  if (!file) return alert("Selecciona una imagen");
+  if (!file) return alert("selecciona una imagen");
 
   const reader = new FileReader();
   reader.onloadend = async () => {
@@ -129,7 +196,7 @@ async function upload() {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        message: "Nueva foto",
+        message: "nueva imagen",
         content: content,
         branch: branch
       })
@@ -142,7 +209,7 @@ async function upload() {
 }
 
 /* -------------------------
-   CARGAR GALERÍA
+   GALERÍA
 -------------------------- */
 async function loadGallery() {
   const res = await fetch(`https://api.github.com/repos/${username}/${repo}/contents/images`);
