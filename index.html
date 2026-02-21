@@ -11,7 +11,6 @@
       padding:20px;
       max-width:900px;
       margin:auto;
-      overflow-x:hidden;
     }
 
     /* Fondo Matrix */
@@ -41,21 +40,6 @@
       margin-bottom:30px;
       letter-spacing:3px;
       font-size:28px;
-      animation: typing 2s steps(20), blink 0.7s infinite;
-      white-space:nowrap;
-      overflow:hidden;
-      border-right:2px solid #00ff9c;
-      width: 22ch;
-      margin:auto;
-    }
-
-    @keyframes typing {
-      from { width:0; }
-      to { width:22ch; }
-    }
-
-    @keyframes blink {
-      50% { border-color:transparent; }
     }
 
     /* LOGIN */
@@ -67,12 +51,6 @@
       border:1px solid #00ff9c;
       border-radius:8px;
       box-shadow:0 0 15px #00ff9c33;
-      animation: fadeIn 1s ease-out;
-    }
-
-    @keyframes fadeIn {
-      from { opacity:0; transform:scale(0.95); }
-      to { opacity:1; transform:scale(1); }
     }
 
     #loginBox input {
@@ -101,6 +79,10 @@
     }
 
     /* APP */
+    #app {
+      display:none;
+    }
+
     #top {
       display:flex;
       gap:10px;
@@ -137,12 +119,6 @@
       border-radius:10px;
       padding:8px;
       box-shadow:0 0 10px #00ff9c22;
-      transition:0.2s;
-    }
-
-    .card:hover {
-      transform:scale(1.03);
-      box-shadow:0 0 15px #00ff9c55;
     }
 
     .card img {
@@ -167,7 +143,7 @@
 </div>
 
 <!-- APP -->
-<div id="app" style="display:none;">
+<div id="app">
   <div id="top">
     <input type="file" id="fileInput" accept="image/*">
     <button onclick="upload()">subir</button>
@@ -184,28 +160,22 @@
 const USER = "colimbo";
 const PASS = "7600";
 
-const username = "TU_USUARIO";  // <-- cámbialo
-const repo = "TU_REPO";         // <-- cámbialo
+const username = "colimbo67";  
+const repo = "tikbird";        
 const branch = "main";
 
 /* -------------------------
    LOGIN
 -------------------------- */
-function checkLogin() {
-  if (localStorage.getItem("logged") === "yes") {
-    document.getElementById("loginBox").style.display = "none";
-    document.getElementById("app").style.display = "block";
-    loadGallery();
-  }
-}
-
 function login() {
   const u = document.getElementById("user").value;
   const p = document.getElementById("pass").value;
 
   if (u === USER && p === PASS) {
     localStorage.setItem("logged", "yes");
-    checkLogin();
+    document.getElementById("loginBox").style.display = "none";
+    document.getElementById("app").style.display = "block";
+    loadGallery();
   } else {
     document.getElementById("msg").textContent = "acceso denegado";
   }
@@ -214,6 +184,11 @@ function login() {
 function logout() {
   localStorage.removeItem("logged");
   location.reload();
+}
+
+if (localStorage.getItem("logged") === "yes") {
+  document.getElementById("loginBox").style.display = "none";
+  document.getElementById("app").style.display = "block";
 }
 
 /* -------------------------
@@ -237,7 +212,7 @@ async function upload() {
     const content = reader.result.split(",")[1];
     const filename = `images/${Date.now()}-${file.name}`;
 
-    await fetch(`https://api.github.com/repos/${username}/${repo}/contents/${filename}`, {
+    const res = await fetch(`https://api.github.com/repos/${username}/${repo}/contents/${filename}`, {
       method: "PUT",
       headers: {
         "Authorization": `token ${token}`,
@@ -249,6 +224,11 @@ async function upload() {
         branch: branch
       })
     });
+
+    if (!res.ok) {
+      alert("Error subiendo archivo. Revisa usuario, repo o token.");
+      return;
+    }
 
     loadGallery();
   };
@@ -280,8 +260,6 @@ async function loadGallery() {
       gallery.appendChild(card);
     });
 }
-
-checkLogin();
 </script>
 
 </body>
