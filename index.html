@@ -158,7 +158,7 @@
 <h1>colimbo://mini-instagram</h1>
 
 <!-- LOGIN -->
-<div id="loginBox" style="display:none;">
+<div id="loginBox">
   <h2>login_required</h2>
   <input id="user" placeholder="usuario">
   <input id="pass" type="password" placeholder="contraseña">
@@ -196,9 +196,6 @@ function checkLogin() {
     document.getElementById("loginBox").style.display = "none";
     document.getElementById("app").style.display = "block";
     loadGallery();
-  } else {
-    document.getElementById("loginBox").style.display = "block";
-    document.getElementById("app").style.display = "none";
   }
 }
 
@@ -216,7 +213,7 @@ function login() {
 
 function logout() {
   localStorage.removeItem("logged");
-  checkLogin();
+  location.reload();
 }
 
 /* -------------------------
