@@ -12,8 +12,6 @@
       max-width:900px;
       margin:auto;
     }
-
-    /* Fondo Matrix */
     body::before {
       content:"";
       position:fixed;
@@ -28,12 +26,10 @@
       animation: matrix 2s linear infinite;
       z-index:-1;
     }
-
     @keyframes matrix {
       from { background-position:0 0; }
       to { background-position:0 10px; }
     }
-
     h1 {
       text-align:center;
       color:#00ff9c;
@@ -41,19 +37,16 @@
       letter-spacing:3px;
       font-size:28px;
     }
-
-    /* LOGIN */
-    #loginBox {
+    #loginBox, #signupBox {
       max-width:320px;
-      margin:80px auto;
+      margin:40px auto;
       padding:25px;
       background:#050505;
       border:1px solid #00ff9c;
       border-radius:8px;
       box-shadow:0 0 15px #00ff9c33;
     }
-
-    #loginBox input {
+    #loginBox input, #signupBox input {
       width:100%;
       padding:10px;
       margin:10px 0;
@@ -62,8 +55,7 @@
       border:1px solid #00ff9c55;
       border-radius:5px;
     }
-
-    #loginBox button {
+    #loginBox button, #signupBox button {
       width:100%;
       padding:10px;
       background:#00ff9c;
@@ -72,17 +64,12 @@
       border-radius:5px;
       cursor:pointer;
       font-weight:bold;
+      margin-top:5px;
     }
-
-    #loginBox button:hover {
+    #loginBox button:hover, #signupBox button:hover {
       background:#00cc7a;
     }
-
-    /* APP */
-    #app {
-      display:none;
-    }
-
+    #app { display:none; }
     #top {
       display:flex;
       gap:10px;
@@ -90,7 +77,6 @@
       margin-bottom:20px;
       flex-wrap:wrap;
     }
-
     button, input[type="file"] {
       padding:8px 12px;
       border-radius:6px;
@@ -100,32 +86,51 @@
       cursor:pointer;
       transition:0.2s;
     }
-
     button:hover {
       background:#00ff9c;
       color:#000;
     }
-
     #gallery {
       display:grid;
       grid-template-columns:repeat(auto-fill, minmax(200px, 1fr));
       gap:15px;
       margin-top:20px;
     }
-
     .card {
       background:#050505;
       border:1px solid #00ff9c33;
       border-radius:10px;
       padding:8px;
       box-shadow:0 0 10px #00ff9c22;
+      position:relative;
     }
-
     .card img {
       width:100%;
       height:200px;
       object-fit:cover;
       border-radius:8px;
+    }
+    .delete-btn {
+      position:absolute;
+      top:6px;
+      right:6px;
+      background:#ff4d4d;
+      color:#000;
+      border:none;
+      border-radius:4px;
+      padding:3px 6px;
+      font-size:10px;
+      cursor:pointer;
+    }
+    .delete-btn:hover {
+      background:#ff8080;
+    }
+    #adminPanel {
+      margin-top:20px;
+      padding:10px;
+      border:1px solid #00ff9c55;
+      border-radius:8px;
+      background:#050505;
     }
   </style>
 </head>
@@ -133,77 +138,202 @@
 
 <h1>colimbo://mini-instagram</h1>
 
-<!-- LOGIN -->
 <div id="loginBox">
   <h2>login_required</h2>
-  <input id="user" placeholder="usuario">
-  <input id="pass" type="password" placeholder="contraseña">
+  <input id="loginUser" placeholder="usuario">
+  <input id="loginPass" type="password" placeholder="contraseña">
   <button onclick="login()">acceder</button>
-  <p id="msg" style="color:#ff4d4d;"></p>
+  <button onclick="showSignup()">crear cuenta</button>
+  <p id="loginMsg" style="color:#ff4d4d;"></p>
 </div>
 
-<!-- APP -->
+<div id="signupBox" style="display:none;">
+  <h2>crear_cuenta</h2>
+  <input id="signupUser" placeholder="nuevo usuario">
+  <input id="signupPass" type="password" placeholder="nueva contraseña">
+  <button onclick="signup()">registrar</button>
+  <button onclick="hideSignup()">volver al login</button>
+  <p id="signupMsg" style="color:#ff4d4d;"></p>
+</div>
+
 <div id="app">
   <div id="top">
+    <span id="welcome"></span>
     <input type="file" id="fileInput" accept="image/*">
     <button onclick="upload()">subir</button>
     <button onclick="logout()">salir</button>
+  </div>
+
+  <div id="adminPanel" style="display:none;">
+    <strong>ADMIN PANEL</strong>
+    <p>Todos los usuarios comparten la misma galería. Cualquiera puede crear cuenta. Solo admin ve este panel.</p>
   </div>
 
   <div id="gallery"></div>
 </div>
 
 <script>
-/* -------------------------
-   CONFIGURACIÓN
--------------------------- */
-const USER = "colimbo";
-const PASS = "7600";
-
-const username = "colimbo67";  
-const repo = "tikbird";        
+const username = "colimbo67";
+const repo = "tikbird";
 const branch = "main";
 
-/* -------------------------
-   LOGIN
--------------------------- */
-function login() {
-  const u = document.getElementById("user").value;
-  const p = document.getElementById("pass").value;
+let currentUser = null;
+let currentRole = null;
+let usersCache = null;
 
-  if (u === USER && p === PASS) {
-    localStorage.setItem("logged", "yes");
-    document.getElementById("loginBox").style.display = "none";
-    document.getElementById("app").style.display = "block";
-    loadGallery();
-  } else {
-    document.getElementById("msg").textContent = "acceso denegado";
-  }
-}
-
-function logout() {
-  localStorage.removeItem("logged");
-  location.reload();
-}
-
-if (localStorage.getItem("logged") === "yes") {
-  document.getElementById("loginBox").style.display = "none";
-  document.getElementById("app").style.display = "block";
-}
-
-/* -------------------------
-   TOKEN GITHUB
--------------------------- */
+/* TOKEN */
 let token = localStorage.getItem("github_token");
 if (!token) {
   token = prompt("token github:");
   if (token) localStorage.setItem("github_token", token);
 }
 
-/* -------------------------
-   SUBIR FOTO
--------------------------- */
+/* UI helpers */
+function showSignup() {
+  document.getElementById("loginBox").style.display = "none";
+  document.getElementById("signupBox").style.display = "block";
+}
+function hideSignup() {
+  document.getElementById("signupBox").style.display = "none";
+  document.getElementById("loginBox").style.display = "block";
+}
+
+/* USERS: load users.json */
+async function loadUsers() {
+  const res = await fetch(`https://api.github.com/repos/${username}/${repo}/contents/users.json`);
+  if (!res.ok) {
+    console.error("No se pudo cargar users.json");
+    return null;
+  }
+  const data = await res.json();
+  const content = atob(data.content);
+  const json = JSON.parse(content);
+  usersCache = { json, sha: data.sha };
+  return usersCache;
+}
+
+/* LOGIN */
+async function login() {
+  const u = document.getElementById("loginUser").value.trim();
+  const p = document.getElementById("loginPass").value.trim();
+  const boxMsg = document.getElementById("loginMsg");
+
+  const usersData = usersCache || await loadUsers();
+  if (!usersData) {
+    boxMsg.textContent = "error cargando usuarios";
+    return;
+  }
+
+  const user = usersData.json.users.find(x => x.username === u && x.password === p);
+  if (!user) {
+    boxMsg.textContent = "credenciales inválidas";
+    return;
+  }
+
+  currentUser = user.username;
+  currentRole = user.role || "user";
+  localStorage.setItem("logged_user", currentUser);
+  localStorage.setItem("logged_role", currentRole);
+
+  document.getElementById("loginBox").style.display = "none";
+  document.getElementById("signupBox").style.display = "none";
+  document.getElementById("app").style.display = "block";
+  document.getElementById("welcome").textContent = `user: ${currentUser} (${currentRole})`;
+
+  if (currentRole === "admin") {
+    document.getElementById("adminPanel").style.display = "block";
+  } else {
+    document.getElementById("adminPanel").style.display = "none";
+  }
+
+  loadGallery();
+}
+
+/* SIGNUP: cualquiera puede crear cuenta (role=user) */
+async function signup() {
+  const u = document.getElementById("signupUser").value.trim();
+  const p = document.getElementById("signupPass").value.trim();
+  const msg = document.getElementById("signupMsg");
+
+  if (!u || !p) {
+    msg.textContent = "rellena usuario y contraseña";
+    return;
+  }
+
+  const usersData = usersCache || await loadUsers();
+  if (!usersData) {
+    msg.textContent = "error cargando usuarios";
+    return;
+  }
+
+  if (usersData.json.users.find(x => x.username === u)) {
+    msg.textContent = "ese usuario ya existe";
+    return;
+  }
+
+  usersData.json.users.push({ username: u, password: p, role: "user" });
+
+  const newContent = btoa(JSON.stringify(usersData.json, null, 2));
+
+  const res = await fetch(`https://api.github.com/repos/${username}/${repo}/contents/users.json`, {
+    method: "PUT",
+    headers: {
+      "Authorization": `token ${token}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      message: `nuevo usuario ${u}`,
+      content: newContent,
+      sha: usersData.sha,
+      branch: branch
+    })
+  });
+
+  if (!res.ok) {
+    msg.textContent = "error guardando usuario";
+    return;
+  }
+
+  const updated = await res.json();
+  usersCache.sha = updated.content.sha;
+  msg.style.color = "#00ff9c";
+  msg.textContent = "usuario creado, ahora puedes iniciar sesión";
+}
+
+/* AUTO LOGIN SI YA ESTÁ GUARDADO */
+(async function init() {
+  const savedUser = localStorage.getItem("logged_user");
+  const savedRole = localStorage.getItem("logged_role");
+  if (savedUser && savedRole) {
+    currentUser = savedUser;
+    currentRole = savedRole;
+    document.getElementById("loginBox").style.display = "none";
+    document.getElementById("signupBox").style.display = "none";
+    document.getElementById("app").style.display = "block";
+    document.getElementById("welcome").textContent = `user: ${currentUser} (${currentRole})`;
+    if (currentRole === "admin") {
+      document.getElementById("adminPanel").style.display = "block";
+    }
+    await loadUsers();
+    loadGallery();
+  } else {
+    await loadUsers();
+  }
+})();
+
+/* LOGOUT */
+function logout() {
+  localStorage.removeItem("logged_user");
+  localStorage.removeItem("logged_role");
+  location.reload();
+}
+
+/* SUBIR FOTO */
 async function upload() {
+  if (!currentUser) {
+    alert("inicia sesión");
+    return;
+  }
   const file = document.getElementById("fileInput").files[0];
   if (!file) return alert("selecciona una imagen");
 
@@ -219,14 +349,14 @@ async function upload() {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        message: "nueva imagen",
+        message: `nueva imagen de ${currentUser}`,
         content: content,
         branch: branch
       })
     });
 
     if (!res.ok) {
-      alert("Error subiendo archivo. Revisa usuario, repo o token.");
+      alert("Error subiendo archivo. Revisa token o permisos.");
       return;
     }
 
@@ -236,9 +366,38 @@ async function upload() {
   reader.readAsDataURL(file);
 }
 
-/* -------------------------
-   GALERÍA
--------------------------- */
+/* BORRAR FOTO (solo admin) */
+async function deleteImage(path, sha) {
+  if (currentRole !== "admin") {
+    alert("solo admin puede borrar");
+    return;
+  }
+
+  const ok = confirm(`borrar ${path}?`);
+  if (!ok) return;
+
+  const res = await fetch(`https://api.github.com/repos/${username}/${repo}/contents/${path}`, {
+    method: "DELETE",
+    headers: {
+      "Authorization": `token ${token}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      message: `borrar imagen ${path}`,
+      sha: sha,
+      branch: branch
+    })
+  });
+
+  if (!res.ok) {
+    alert("error borrando imagen");
+    return;
+  }
+
+  loadGallery();
+}
+
+/* GALERÍA */
 async function loadGallery() {
   const res = await fetch(`https://api.github.com/repos/${username}/${repo}/contents/images`);
   if (!res.ok) return;
@@ -257,6 +416,15 @@ async function loadGallery() {
       const img = document.createElement("img");
       img.src = f.download_url;
       card.appendChild(img);
+
+      if (currentRole === "admin") {
+        const btn = document.createElement("button");
+        btn.textContent = "borrar";
+        btn.className = "delete-btn";
+        btn.onclick = () => deleteImage(f.path, f.sha);
+        card.appendChild(btn);
+      }
+
       gallery.appendChild(card);
     });
 }
