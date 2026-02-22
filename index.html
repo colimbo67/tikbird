@@ -578,6 +578,8 @@ async function deleteImage(path, sha) {
 
 /* LIKE / UNLIKE */
 async function toggleLike(imageKey) {
+  if (isBanned(currentUser)) return alert("Estás baneado.");
+
   if (!currentUser) {
     alert("inicia sesión");
     return;
@@ -603,6 +605,8 @@ async function toggleLike(imageKey) {
 
 /* AÑADIR COMENTARIO */
 async function addComment(imageKey, inputId) {
+  if (isBanned(currentUser)) return alert("Estás baneado.");
+
   if (!currentUser) {
     alert("inicia sesión");
     return;
