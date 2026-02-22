@@ -710,6 +710,118 @@ async function loadGallery() {
       gallery.appendChild(card);
     });
 }
+  /* ============================
+      PERFILES
+============================ */
+
+let profilesData = null;
+let profilesSha = null;
+
+/* Cargar perfiles */
+async function loadProfiles() {
+  const data = await loadJson("profiles.json");
+  if (!data) return null;
+  profilesData = data.json;
+  profilesSha = data.sha;
+  if (!profilesData.profiles) profilesData.profiles = {};
+  return data;
+}
+
+/* Guardar perfiles */
+async function saveProfiles() {
+  const saved = await saveJson("profiles.json", profilesData, profilesSha, "update profiles");
+  if (saved) profilesSha = saved.content.sha;
+}
+
+/* Obtener perfil */
+function getProfile(user) {
+  if (!profilesData || !profilesData.profiles[user]) {
+    profilesData.profiles[user] = {
+      avatar: "",
+      bio: "",
+      color: "#00ff9c",
+      created: Date.now()
+    };
+  }
+  return profilesData.profiles[user];
+}
+
+/* Mostrar perfil */
+function showProfile(user) {
+  const p = getProfile(user);
+
+  const html = `
+    <div style="padding:20px;">
+      <h2 style="color:${p.color};">perfil:// ${user}</h2>
+      <img src="${p.avatar || "https://via.placeholder.com/120"}" style="width:120px;height:120px;border-radius:50%;border:2px solid ${p.color};">
+      <p><strong>bio:</strong> ${p.bio || "(vacío)"}</p>
+      <p><strong>creado:</strong> ${new Date(p.created).toLocaleString()}</p>
+      ${user === currentUser ? `
+        <button onclick="editProfile()">editar perfil</button>
+      ` : ""}
+      <button onclick="closeProfile()">cerrar</button>
+    </div>
+  `;
+
+  const box = document.createElement("div");
+  box.id = "profileBox";
+  box.style.position = "fixed";
+  box.style.top = "0";
+  box.style.left = "0";
+  box.style.width = "100%";
+  box.style.height = "100%";
+  box.style.background = "rgba(0,0,0,0.9)";
+  box.style.color = "#00ff9c";
+  box.style.zIndex = "9999";
+  box.style.overflow = "auto";
+  box.innerHTML = html;
+
+  document.body.appendChild(box);
+}
+
+/* Cerrar perfil */
+function closeProfile() {
+  const box = document.getElementById("profileBox");
+  if (box) box.remove();
+}
+
+/* Editar perfil */
+function editProfile() {
+  const p = getProfile(currentUser);
+
+  const html = `
+    <div style="padding:20px;">
+      <h2 style="color:${p.color};">editar perfil</h2>
+
+      <label>avatar (URL):</label>
+      <input id="editAvatar" value="${p.avatar}" style="width:100%;padding:6px;margin-bottom:10px;">
+
+      <label>bio:</label>
+      <input id="editBio" value="${p.bio}" style="width:100%;padding:6px;margin-bottom:10px;">
+
+      <label>color:</label>
+      <input id="editColor" type="color" value="${p.color}" style="width:100%;padding:6px;margin-bottom:10px;">
+
+      <button onclick="saveProfile()">guardar</button>
+      <button onclick="closeProfile()">cancelar</button>
+    </div>
+  `;
+
+  document.getElementById("profileBox").innerHTML = html;
+}
+
+/* Guardar cambios */
+async function saveProfile() {
+  const p = getProfile(currentUser);
+
+  p.avatar = document.getElementById("editAvatar").value.trim();
+  p.bio = document.getElementById("editBio").value.trim();
+  p.color = document.getElementById("editColor").value;
+
+  await saveProfiles();
+  closeProfile();
+}
+
 </script>
 
 </body>
