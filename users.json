@@ -1,5 +1,14 @@
 {
   "users": [
-    { "username": "colimbo", "password": "7600", "role": "admin" }
+    {
+      "username": "colimbo",
+      "password": "7600",
+      "role": "admin"
+    },
+    {
+      "username": "colimbo1",
+      "password": "kakapo",
+      "role": "user"
+    }
   ]
 }
