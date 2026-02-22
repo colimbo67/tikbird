@@ -9,6 +9,11 @@
       "username": "colimbo1",
       "password": "kakapo",
       "role": "user"
+    },
+    {
+      "username": "nival",
+      "password": "buhonival",
+      "role": "user"
     }
   ]
 }
