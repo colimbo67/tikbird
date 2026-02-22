@@ -823,6 +823,75 @@ async function saveProfile() {
   await saveProfiles();
   closeProfile();
 }
+/* ============================
+      LOGS
+============================ */
+
+let logsData = null;
+let logsSha = null;
+
+async function loadLogs() {
+  const data = await loadJson("logs.json");
+  if (!data) return null;
+  logsData = data.json;
+  logsSha = data.sha;
+  if (!logsData.logs) logsData.logs = [];
+  return data;
+}
+
+async function saveLogs() {
+  const saved = await saveJson("logs.json", logsData, logsSha, "update logs");
+  if (saved) logsSha = saved.content.sha;
+}
+
+function addLog(action, details = "") {
+  if (!logsData) return;
+  logsData.logs.push({
+    user: currentUser || "unknown",
+    action,
+    details,
+    time: Date.now()
+  });
+  saveLogs();
+}
+/* ============================
+      BANEOS
+============================ */
+
+let bansData = null;
+let bansSha = null;
+
+async function loadBans() {
+  const data = await loadJson("bans.json");
+  if (!data) return null;
+  bansData = data.json;
+  bansSha = data.sha;
+  if (!bansData.bans) bansData.bans = [];
+  return data;
+}
+
+async function saveBans() {
+  const saved = await saveJson("bans.json", bansData, bansSha, "update bans");
+  if (saved) bansSha = saved.content.sha;
+}
+
+function isBanned(user) {
+  return bansData && bansData.bans.includes(user);
+}
+
+async function banUser(user) {
+  if (!bansData.bans.includes(user)) {
+    bansData.bans.push(user);
+    await saveBans();
+    addLog("ban", user);
+  }
+}
+
+async function unbanUser(user) {
+  bansData.bans = bansData.bans.filter(u => u !== user);
+  await saveBans();
+  addLog("unban", user);
+}
 
 </script>
 
