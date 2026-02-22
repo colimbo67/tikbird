@@ -495,6 +495,8 @@ async function createUser() {
 
 /* SUBIR FOTO */
 async function upload() {
+  if (isBanned(currentUser)) return alert("Estás baneado.");
+
   if (!currentUser) {
     alert("inicia sesión");
     return;
