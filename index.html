@@ -6,47 +6,63 @@
   <style>
     body {
       font-family: "JetBrains Mono", monospace;
-      background:#000;
+      background:#020202;
       color:#00ff9c;
       padding:20px;
-      max-width:900px;
+      max-width:1000px;
       margin:auto;
     }
     body::before {
       content:"";
       position:fixed;
-      top:0; left:0;
-      width:100%; height:100%;
-      background: repeating-linear-gradient(
-        rgba(0,255,150,0.05) 0px,
-        rgba(0,255,150,0.05) 1px,
-        transparent 1px,
-        transparent 3px
-      );
+      inset:0;
+      background:
+        radial-gradient(circle at 10% 20%, rgba(0,255,156,0.12) 0, transparent 50%),
+        radial-gradient(circle at 90% 80%, rgba(0,200,255,0.12) 0, transparent 55%),
+        repeating-linear-gradient(
+          rgba(0,255,150,0.05) 0px,
+          rgba(0,255,150,0.05) 1px,
+          transparent 1px,
+          transparent 3px
+        );
       animation: matrix 2s linear infinite;
       z-index:-1;
     }
     @keyframes matrix {
-      from { background-position:0 0; }
-      to { background-position:0 10px; }
+      from { background-position:0 0, 0 0, 0 0; }
+      to   { background-position:0 10px, 0 0, 0 10px; }
     }
     h1 {
       text-align:center;
       color:#00ff9c;
-      margin-bottom:30px;
+      margin-bottom:10px;
       letter-spacing:3px;
-      font-size:28px;
+      font-size:30px;
+      text-shadow:0 0 8px #00ff9c88;
     }
-    #loginBox, #signupBox {
-      max-width:320px;
+    #subtitle {
+      text-align:center;
+      font-size:12px;
+      color:#00ff9c88;
+      margin-bottom:30px;
+    }
+    #loginBox {
+      max-width:340px;
       margin:40px auto;
-      padding:25px;
+      padding:25px 25px 18px;
       background:#050505;
-      border:1px solid #00ff9c;
-      border-radius:8px;
-      box-shadow:0 0 15px #00ff9c33;
+      border:1px solid #00ff9c55;
+      border-radius:10px;
+      box-shadow:0 0 25px #00ff9c33;
     }
-    #loginBox input, #signupBox input {
+    #loginBox h2 {
+      margin-top:0;
+      font-size:16px;
+      text-transform:uppercase;
+      letter-spacing:2px;
+      color:#00ff9cdd;
+    }
+    #loginBox input {
       width:100%;
       padding:10px;
       margin:10px 0;
@@ -55,7 +71,7 @@
       border:1px solid #00ff9c55;
       border-radius:5px;
     }
-    #loginBox button, #signupBox button {
+    #loginBox button {
       width:100%;
       padding:10px;
       background:#00ff9c;
@@ -66,16 +82,41 @@
       font-weight:bold;
       margin-top:5px;
     }
-    #loginBox button:hover, #signupBox button:hover {
+    #loginBox button:hover {
       background:#00cc7a;
     }
+    #loginMsg {
+      min-height:18px;
+      font-size:12px;
+      margin-top:6px;
+    }
     #app { display:none; }
+
     #top {
       display:flex;
       gap:10px;
-      justify-content:center;
-      margin-bottom:20px;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:15px;
       flex-wrap:wrap;
+    }
+    #leftTop, #rightTop {
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    #welcome {
+      font-size:13px;
+      color:#00ff9cbb;
+    }
+    .pill {
+      border-radius:999px;
+      border:1px solid #00ff9c55;
+      padding:4px 10px;
+      font-size:11px;
+      text-transform:uppercase;
+      letter-spacing:1px;
     }
     button, input[type="file"] {
       padding:8px 12px;
@@ -84,89 +125,129 @@
       color:#00ff9c;
       border:1px solid #00ff9c55;
       cursor:pointer;
-      transition:0.2s;
+      transition:0.15s;
+      font-size:12px;
     }
     button:hover {
       background:#00ff9c;
       color:#000;
+      box-shadow:0 0 10px #00ff9c55;
     }
+    input[type="file"]::-webkit-file-upload-button {
+      background:#00ff9c;
+      color:#000;
+      border:none;
+      padding:6px 10px;
+      margin-right:8px;
+      border-radius:4px;
+      cursor:pointer;
+    }
+    #adminPanel {
+      margin-bottom:15px;
+      padding:10px 12px;
+      border:1px solid #00ff9c55;
+      border-radius:8px;
+      background:#050505;
+      font-size:12px;
+    }
+    #adminPanel strong {
+      color:#00ff9c;
+      text-transform:uppercase;
+      letter-spacing:1px;
+      font-size:11px;
+    }
+    #adminPanel input {
+      padding:6px 8px;
+      font-size:11px;
+    }
+    #adminPanel button {
+      font-size:11px;
+      padding:6px 10px;
+    }
+
     #gallery {
       display:grid;
-      grid-template-columns:repeat(auto-fill, minmax(200px, 1fr));
-      gap:15px;
-      margin-top:20px;
+      grid-template-columns:repeat(auto-fill, minmax(220px, 1fr));
+      gap:16px;
+      margin-top:10px;
     }
     .card {
       background:#050505;
       border:1px solid #00ff9c33;
       border-radius:10px;
       padding:8px;
-      box-shadow:0 0 10px #00ff9c22;
+      box-shadow:0 0 12px #00ff9c22;
       position:relative;
+      overflow:hidden;
     }
     .card img {
       width:100%;
-      height:200px;
+      height:230px;
       object-fit:cover;
       border-radius:8px;
+      display:block;
+    }
+    .meta {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-top:6px;
+      font-size:11px;
+      color:#00ff9caa;
     }
     .delete-btn {
-      position:absolute;
-      top:6px;
-      right:6px;
+      border-radius:999px;
       background:#ff4d4d;
       color:#000;
       border:none;
-      border-radius:4px;
-      padding:3px 6px;
+      padding:3px 8px;
       font-size:10px;
       cursor:pointer;
     }
     .delete-btn:hover {
       background:#ff8080;
     }
-    #adminPanel {
-      margin-top:20px;
-      padding:10px;
-      border:1px solid #00ff9c55;
-      border-radius:8px;
-      background:#050505;
-    }
   </style>
 </head>
 <body>
 
 <h1>colimbo://mini-instagram</h1>
+<div id="subtitle">multiuser feed • github-backed • low-level social network</div>
 
 <div id="loginBox">
   <h2>login_required</h2>
   <input id="loginUser" placeholder="usuario">
   <input id="loginPass" type="password" placeholder="contraseña">
   <button onclick="login()">acceder</button>
-  <button onclick="showSignup()">crear cuenta</button>
   <p id="loginMsg" style="color:#ff4d4d;"></p>
-</div>
-
-<div id="signupBox" style="display:none;">
-  <h2>crear_cuenta</h2>
-  <input id="signupUser" placeholder="nuevo usuario">
-  <input id="signupPass" type="password" placeholder="nueva contraseña">
-  <button onclick="signup()">registrar</button>
-  <button onclick="hideSignup()">volver al login</button>
-  <p id="signupMsg" style="color:#ff4d4d;"></p>
 </div>
 
 <div id="app">
   <div id="top">
-    <span id="welcome"></span>
-    <input type="file" id="fileInput" accept="image/*">
-    <button onclick="upload()">subir</button>
-    <button onclick="logout()">salir</button>
+    <div id="leftTop">
+      <span id="welcome"></span>
+      <span class="pill" id="rolePill"></span>
+    </div>
+    <div id="rightTop">
+      <input type="file" id="fileInput" accept="image/*">
+      <button onclick="upload()">subir</button>
+      <button onclick="logout()">salir</button>
+    </div>
   </div>
 
   <div id="adminPanel" style="display:none;">
-    <strong>ADMIN PANEL</strong>
-    <p>Todos los usuarios comparten la misma galería. Cualquiera puede crear cuenta. Solo admin ve este panel.</p>
+    <strong>admin panel</strong>
+    <p>Solo tú puedes crear cuentas. Todos pueden borrar fotos. Todo el feed es compartido.</p>
+    <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:6px;">
+      <input id="newUser" placeholder="nuevo usuario">
+      <input id="newPass" type="password" placeholder="contraseña">
+      <select id="newRole">
+        <option value="user">user</option>
+        <option value="admin">admin</option>
+      </select>
+      <button onclick="createUser()">crear cuenta</button>
+      <span id="adminMsg" style="font-size:11px; color:#00ff9c88;"></span>
+    </div>
   </div>
 
   <div id="gallery"></div>
@@ -188,16 +269,6 @@ if (!token) {
   if (token) localStorage.setItem("github_token", token);
 }
 
-/* UI helpers */
-function showSignup() {
-  document.getElementById("loginBox").style.display = "none";
-  document.getElementById("signupBox").style.display = "block";
-}
-function hideSignup() {
-  document.getElementById("signupBox").style.display = "none";
-  document.getElementById("loginBox").style.display = "block";
-}
-
 /* USERS: load users.json */
 async function loadUsers() {
   const res = await fetch(`https://api.github.com/repos/${username}/${repo}/contents/users.json`);
@@ -217,6 +288,7 @@ async function login() {
   const u = document.getElementById("loginUser").value.trim();
   const p = document.getElementById("loginPass").value.trim();
   const boxMsg = document.getElementById("loginMsg");
+  boxMsg.textContent = "";
 
   const usersData = usersCache || await loadUsers();
   if (!usersData) {
@@ -235,10 +307,15 @@ async function login() {
   localStorage.setItem("logged_user", currentUser);
   localStorage.setItem("logged_role", currentRole);
 
+  enterApp();
+}
+
+/* ENTRAR A LA APP */
+function enterApp() {
   document.getElementById("loginBox").style.display = "none";
-  document.getElementById("signupBox").style.display = "none";
   document.getElementById("app").style.display = "block";
-  document.getElementById("welcome").textContent = `user: ${currentUser} (${currentRole})`;
+  document.getElementById("welcome").textContent = `user: ${currentUser}`;
+  document.getElementById("rolePill").textContent = currentRole;
 
   if (currentRole === "admin") {
     document.getElementById("adminPanel").style.display = "block";
@@ -249,30 +326,56 @@ async function login() {
   loadGallery();
 }
 
-/* SIGNUP: cualquiera puede crear cuenta (role=user) */
-async function signup() {
-  const u = document.getElementById("signupUser").value.trim();
-  const p = document.getElementById("signupPass").value.trim();
-  const msg = document.getElementById("signupMsg");
+/* AUTO LOGIN SI YA ESTÁ GUARDADO */
+(async function init() {
+  const savedUser = localStorage.getItem("logged_user");
+  const savedRole = localStorage.getItem("logged_role");
+  await loadUsers();
+  if (savedUser && savedRole) {
+    currentUser = savedUser;
+    currentRole = savedRole;
+    enterApp();
+  }
+})();
+
+/* LOGOUT */
+function logout() {
+  localStorage.removeItem("logged_user");
+  localStorage.removeItem("logged_role");
+  location.reload();
+}
+
+/* ADMIN: CREAR USUARIO (solo tú) */
+async function createUser() {
+  if (currentRole !== "admin") {
+    alert("solo admin puede crear cuentas");
+    return;
+  }
+  const u = document.getElementById("newUser").value.trim();
+  const p = document.getElementById("newPass").value.trim();
+  const r = document.getElementById("newRole").value;
+  const msg = document.getElementById("adminMsg");
 
   if (!u || !p) {
-    msg.textContent = "rellena usuario y contraseña";
+    msg.style.color = "#ff4d4d";
+    msg.textContent = "usuario y contraseña requeridos";
     return;
   }
 
   const usersData = usersCache || await loadUsers();
   if (!usersData) {
+    msg.style.color = "#ff4d4d";
     msg.textContent = "error cargando usuarios";
     return;
   }
 
   if (usersData.json.users.find(x => x.username === u)) {
+    msg.style.color = "#ff4d4d";
     msg.textContent = "ese usuario ya existe";
     return;
   }
 
-  usersData.json.users.push({ username: u, password: p, role: "user" });
-
+  usersData.json.users.push({ username: u, password: p, role: r });
   const newContent = btoa(JSON.stringify(usersData.json, null, 2));
 
   const res = await fetch(`https://api.github.com/repos/${username}/${repo}/contents/users.json`, {
@@ -290,6 +393,7 @@ async function signup() {
   });
 
   if (!res.ok) {
+    msg.style.color = "#ff4d4d";
     msg.textContent = "error guardando usuario";
     return;
   }
@@ -297,35 +401,9 @@ async function signup() {
   const updated = await res.json();
   usersCache.sha = updated.content.sha;
   msg.style.color = "#00ff9c";
-  msg.textContent = "usuario creado, ahora puedes iniciar sesión";
-}
-
-/* AUTO LOGIN SI YA ESTÁ GUARDADO */
-(async function init() {
-  const savedUser = localStorage.getItem("logged_user");
-  const savedRole = localStorage.getItem("logged_role");
-  if (savedUser && savedRole) {
-    currentUser = savedUser;
-    currentRole = savedRole;
-    document.getElementById("loginBox").style.display = "none";
-    document.getElementById("signupBox").style.display = "none";
-    document.getElementById("app").style.display = "block";
-    document.getElementById("welcome").textContent = `user: ${currentUser} (${currentRole})`;
-    if (currentRole === "admin") {
-      document.getElementById("adminPanel").style.display = "block";
-    }
-    await loadUsers();
-    loadGallery();
-  } else {
-    await loadUsers();
-  }
-})();
-
-/* LOGOUT */
-function logout() {
-  localStorage.removeItem("logged_user");
-  localStorage.removeItem("logged_role");
-  location.reload();
+  msg.textContent = `usuario ${u} creado (${r})`;
+  document.getElementById("newUser").value = "";
+  document.getElementById("newPass").value = "";
 }
 
 /* SUBIR FOTO */
@@ -366,10 +444,10 @@ async function upload() {
   reader.readAsDataURL(file);
 }
 
-/* BORRAR FOTO (solo admin) */
+/* BORRAR FOTO (todos pueden) */
 async function deleteImage(path, sha) {
-  if (currentRole !== "admin") {
-    alert("solo admin puede borrar");
+  if (!currentUser) {
+    alert("inicia sesión");
     return;
   }
 
@@ -383,7 +461,7 @@ async function deleteImage(path, sha) {
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
-      message: `borrar imagen ${path}`,
+      message: `borrar imagen ${path} por ${currentUser}`,
       sha: sha,
       branch: branch
     })
@@ -417,13 +495,17 @@ async function loadGallery() {
       img.src = f.download_url;
       card.appendChild(img);
 
-      if (currentRole === "admin") {
-        const btn = document.createElement("button");
-        btn.textContent = "borrar";
-        btn.className = "delete-btn";
-        btn.onclick = () => deleteImage(f.path, f.sha);
-        card.appendChild(btn);
-      }
+      const meta = document.createElement("div");
+      meta.className = "meta";
+      const left = document.createElement("span");
+      left.textContent = f.name.split("-")[0];
+      const btn = document.createElement("button");
+      btn.textContent = "borrar";
+      btn.className = "delete-btn";
+      btn.onclick = () => deleteImage(f.path, f.sha);
+      meta.appendChild(left);
+      meta.appendChild(btn);
+      card.appendChild(meta);
 
       gallery.appendChild(card);
     });
