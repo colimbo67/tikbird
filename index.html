@@ -167,7 +167,7 @@
 
     #gallery {
       display:grid;
-      grid-template-columns:repeat(auto-fill, minmax(220px, 1fr));
+      grid-template-columns:repeat(auto-fill, minmax(260px, 1fr));
       gap:16px;
       margin-top:10px;
     }
@@ -179,6 +179,9 @@
       box-shadow:0 0 12px #00ff9c22;
       position:relative;
       overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
     }
     .card img {
       width:100%;
@@ -191,7 +194,6 @@
       display:flex;
       justify-content:space-between;
       align-items:center;
-      margin-top:6px;
       font-size:11px;
       color:#00ff9caa;
     }
@@ -207,12 +209,59 @@
     .delete-btn:hover {
       background:#ff8080;
     }
+    .like-btn {
+      border-radius:999px;
+      background:#050505;
+      border:1px solid #00ff9c55;
+      padding:3px 8px;
+      font-size:11px;
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      gap:4px;
+    }
+    .like-btn.liked {
+      background:#00ff9c;
+      color:#000;
+      box-shadow:0 0 10px #00ff9c55;
+    }
+    .comments {
+      border-top:1px solid #00ff9c22;
+      padding-top:6px;
+      margin-top:4px;
+      font-size:11px;
+    }
+    .comment {
+      margin-bottom:3px;
+      color:#00ff9cbb;
+    }
+    .comment strong {
+      color:#00ff9c;
+    }
+    .comment-form {
+      display:flex;
+      gap:4px;
+      margin-top:4px;
+    }
+    .comment-form input {
+      flex:1;
+      padding:4px 6px;
+      font-size:11px;
+      background:#000;
+      color:#00ff9c;
+      border:1px solid #00ff9c55;
+      border-radius:4px;
+    }
+    .comment-form button {
+      font-size:11px;
+      padding:4px 8px;
+    }
   </style>
 </head>
 <body>
 
 <h1>colimbo://mini-instagram</h1>
-<div id="subtitle">multiuser feed • github-backed • low-level social network</div>
+<div id="subtitle">multiuser feed • likes • comments • github-backed</div>
 
 <div id="loginBox">
   <h2>login_required</h2>
@@ -237,7 +286,7 @@
 
   <div id="adminPanel" style="display:none;">
     <strong>admin panel</strong>
-    <p>Solo tú puedes crear cuentas. Todos pueden borrar fotos. Todo el feed es compartido.</p>
+    <p>Solo tú puedes crear cuentas. Todos pueden borrar fotos. Feed compartido.</p>
     <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:6px;">
       <input id="newUser" placeholder="nuevo usuario">
       <input id="newPass" type="password" placeholder="contraseña">
@@ -261,6 +310,10 @@ const branch = "main";
 let currentUser = null;
 let currentRole = null;
 let usersCache = null;
+let likesData = null;
+let likesSha = null;
+let commentsData = null;
+let commentsSha = null;
 
 /* TOKEN */
 let token = localStorage.getItem("github_token");
@@ -269,18 +322,64 @@ if (!token) {
   if (token) localStorage.setItem("github_token", token);
 }
 
-/* USERS: load users.json */
+/* LOAD JSON HELPERS */
+async function loadJson(path) {
+  const res = await fetch(`https://api.github.com/repos/${username}/${repo}/contents/${path}`);
+  if (!res.ok) return null;
+  const data = await res.json();
+  const content = atob(data.content);
+  return { json: JSON.parse(content), sha: data.sha };
+}
+
+/* SAVE JSON HELPERS */
+async function saveJson(path, json, sha, message) {
+  const content = btoa(JSON.stringify(json, null, 2));
+  const res = await fetch(`https://api.github.com/repos/${username}/${repo}/contents/${path}`, {
+    method: "PUT",
+    headers: {
+      "Authorization": `token ${token}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      message,
+      content,
+      sha,
+      branch
+    })
+  });
+  if (!res.ok) return null;
+  return await res.json();
+}
+
+/* USERS */
 async function loadUsers() {
-  const res = await fetch(`https://api.github.com/repos/${username}/${repo}/contents/users.json`);
-  if (!res.ok) {
+  const data = await loadJson("users.json");
+  if (!data) {
     console.error("No se pudo cargar users.json");
     return null;
   }
-  const data = await res.json();
-  const content = atob(data.content);
-  const json = JSON.parse(content);
-  usersCache = { json, sha: data.sha };
-  return usersCache;
+  usersCache = data;
+  return data;
+}
+
+/* LIKES */
+async function loadLikes() {
+  const data = await loadJson("likes.json");
+  if (!data) return null;
+  likesData = data.json;
+  likesSha = data.sha;
+  if (!likesData.likes) likesData.likes = {};
+  return data;
+}
+
+/* COMMENTS */
+async function loadComments() {
+  const data = await loadJson("comments.json");
+  if (!data) return null;
+  commentsData = data.json;
+  commentsSha = data.sha;
+  if (!commentsData.comments) commentsData.comments = {};
+  return data;
 }
 
 /* LOGIN */
@@ -326,11 +425,13 @@ function enterApp() {
   loadGallery();
 }
 
-/* AUTO LOGIN SI YA ESTÁ GUARDADO */
+/* AUTO INIT */
 (async function init() {
+  await loadUsers();
+  await loadLikes();
+  await loadComments();
   const savedUser = localStorage.getItem("logged_user");
   const savedRole = localStorage.getItem("logged_role");
-  await loadUsers();
   if (savedUser && savedRole) {
     currentUser = savedUser;
     currentRole = savedRole;
@@ -345,7 +446,7 @@ function logout() {
   location.reload();
 }
 
-/* ADMIN: CREAR USUARIO (solo tú) */
+/* ADMIN: CREAR USUARIO */
 async function createUser() {
   if (currentRole !== "admin") {
     alert("solo admin puede crear cuentas");
@@ -376,30 +477,14 @@ async function createUser() {
   }
 
   usersData.json.users.push({ username: u, password: p, role: r });
-  const newContent = btoa(JSON.stringify(usersData.json, null, 2));
-
-  const res = await fetch(`https://api.github.com/repos/${username}/${repo}/contents/users.json`, {
-    method: "PUT",
-    headers: {
-      "Authorization": `token ${token}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      message: `nuevo usuario ${u}`,
-      content: newContent,
-      sha: usersData.sha,
-      branch: branch
-    })
-  });
-
-  if (!res.ok) {
+  const saved = await saveJson("users.json", usersData.json, usersData.sha, `nuevo usuario ${u}`);
+  if (!saved) {
     msg.style.color = "#ff4d4d";
     msg.textContent = "error guardando usuario";
     return;
   }
 
-  const updated = await res.json();
-  usersCache.sha = updated.content.sha;
+  usersCache.sha = saved.content.sha;
   msg.style.color = "#00ff9c";
   msg.textContent = `usuario ${u} creado (${r})`;
   document.getElementById("newUser").value = "";
@@ -418,7 +503,7 @@ async function upload() {
   const reader = new FileReader();
   reader.onloadend = async () => {
     const content = reader.result.split(",")[1];
-    const filename = `images/${Date.now()}-${file.name}`;
+    const filename = `images/${Date.now()}-${currentUser}-${file.name}`;
 
     const res = await fetch(`https://api.github.com/repos/${username}/${repo}/contents/${filename}`, {
       method: "PUT",
@@ -428,8 +513,8 @@ async function upload() {
       },
       body: JSON.stringify({
         message: `nueva imagen de ${currentUser}`,
-        content: content,
-        branch: branch
+        content,
+        branch
       })
     });
 
@@ -450,7 +535,6 @@ async function deleteImage(path, sha) {
     alert("inicia sesión");
     return;
   }
-
   const ok = confirm(`borrar ${path}?`);
   if (!ok) return;
 
@@ -462,8 +546,8 @@ async function deleteImage(path, sha) {
     },
     body: JSON.stringify({
       message: `borrar imagen ${path} por ${currentUser}`,
-      sha: sha,
-      branch: branch
+      sha,
+      branch
     })
   });
 
@@ -472,6 +556,72 @@ async function deleteImage(path, sha) {
     return;
   }
 
+  // limpiar likes y comentarios de esa imagen
+  const key = path.split("/").pop();
+  if (likesData && likesData.likes && likesData.likes[key]) {
+    delete likesData.likes[key];
+    const savedLikes = await saveJson("likes.json", likesData, likesSha, `limpiar likes de ${key}`);
+    if (savedLikes) likesSha = savedLikes.content.sha;
+  }
+  if (commentsData && commentsData.comments && commentsData.comments[key]) {
+    delete commentsData.comments[key];
+    const savedComments = await saveJson("comments.json", commentsData, commentsSha, `limpiar comments de ${key}`);
+    if (savedComments) commentsSha = savedComments.content.sha;
+  }
+
+  loadGallery();
+}
+
+/* LIKE / UNLIKE */
+async function toggleLike(imageKey) {
+  if (!currentUser) {
+    alert("inicia sesión");
+    return;
+  }
+  if (!likesData) {
+    await loadLikes();
+  }
+  if (!likesData.likes[imageKey]) likesData.likes[imageKey] = [];
+
+  const list = likesData.likes[imageKey];
+  const idx = list.indexOf(currentUser);
+  if (idx === -1) {
+    list.push(currentUser);
+  } else {
+    list.splice(idx, 1);
+  }
+
+  const saved = await saveJson("likes.json", likesData, likesSha, `update likes ${imageKey}`);
+  if (saved) likesSha = saved.content.sha;
+
+  loadGallery();
+}
+
+/* AÑADIR COMENTARIO */
+async function addComment(imageKey, inputId) {
+  if (!currentUser) {
+    alert("inicia sesión");
+    return;
+  }
+  const input = document.getElementById(inputId);
+  const text = input.value.trim();
+  if (!text) return;
+
+  if (!commentsData) {
+    await loadComments();
+  }
+  if (!commentsData.comments[imageKey]) commentsData.comments[imageKey] = [];
+
+  commentsData.comments[imageKey].push({
+    user: currentUser,
+    text,
+    date: Date.now()
+  });
+
+  const saved = await saveJson("comments.json", commentsData, commentsSha, `nuevo comment en ${imageKey}`);
+  if (saved) commentsSha = saved.content.sha;
+
+  input.value = "";
   loadGallery();
 }
 
@@ -495,17 +645,67 @@ async function loadGallery() {
       img.src = f.download_url;
       card.appendChild(img);
 
+      const imageKey = f.name;
+      const uploader = f.name.split("-")[1] || "unknown";
+
+      // meta (uploader + borrar + likes)
       const meta = document.createElement("div");
       meta.className = "meta";
+
       const left = document.createElement("span");
-      left.textContent = f.name.split("-")[0];
+      left.textContent = `by ${uploader}`;
+
+      const right = document.createElement("div");
+      right.style.display = "flex";
+      right.style.gap = "6px";
+      right.style.alignItems = "center";
+
+      // likes
+      const likesForImage = (likesData && likesData.likes && likesData.likes[imageKey]) ? likesData.likes[imageKey] : [];
+      const likedByMe = likesForImage.includes(currentUser);
+      const likeBtn = document.createElement("button");
+      likeBtn.className = "like-btn" + (likedByMe ? " liked" : "");
+      likeBtn.innerHTML = `❤ ${likesForImage.length}`;
+      likeBtn.onclick = () => toggleLike(imageKey);
+      right.appendChild(likeBtn);
+
+      // borrar
       const btn = document.createElement("button");
       btn.textContent = "borrar";
       btn.className = "delete-btn";
       btn.onclick = () => deleteImage(f.path, f.sha);
+      right.appendChild(btn);
+
       meta.appendChild(left);
-      meta.appendChild(btn);
+      meta.appendChild(right);
       card.appendChild(meta);
+
+      // comentarios
+      const commentsBox = document.createElement("div");
+      commentsBox.className = "comments";
+
+      const list = (commentsData && commentsData.comments && commentsData.comments[imageKey]) ? commentsData.comments[imageKey] : [];
+      list.forEach(c => {
+        const div = document.createElement("div");
+        div.className = "comment";
+        div.innerHTML = `<strong>${c.user}</strong>: ${c.text}`;
+        commentsBox.appendChild(div);
+      });
+
+      const form = document.createElement("div");
+      form.className = "comment-form";
+      const inputId = `comment-${imageKey}`;
+      const input = document.createElement("input");
+      input.id = inputId;
+      input.placeholder = "añadir comentario...";
+      const sendBtn = document.createElement("button");
+      sendBtn.textContent = "enviar";
+      sendBtn.onclick = () => addComment(imageKey, inputId);
+      form.appendChild(input);
+      form.appendChild(sendBtn);
+
+      commentsBox.appendChild(form);
+      card.appendChild(commentsBox);
 
       gallery.appendChild(card);
     });
