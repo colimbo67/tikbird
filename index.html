@@ -540,6 +540,8 @@ async function deleteImage(path, sha) {
     alert("inicia sesión");
     return;
   }
+  addLog("delete", path);
+
   const ok = confirm(`borrar ${path}?`);
   if (!ok) return;
 
