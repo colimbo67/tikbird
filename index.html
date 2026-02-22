@@ -430,6 +430,7 @@ function enterApp() {
   await loadUsers();
   await loadLikes();
   await loadComments();
+  await loadProfiles();
   const savedUser = localStorage.getItem("logged_user");
   const savedRole = localStorage.getItem("logged_role");
   if (savedUser && savedRole) {
