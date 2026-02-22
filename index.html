@@ -526,6 +526,7 @@ async function upload() {
       alert("Error subiendo archivo. Revisa token o permisos.");
       return;
     }
+    addLog("upload", filename);
 
     loadGallery();
   };
