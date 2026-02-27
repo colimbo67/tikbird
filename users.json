@@ -24,6 +24,11 @@
       "username": "fran",
       "password": "fran",
       "role": "user"
+    },
+    {
+      "username": "Nino",
+      "password": "Lb080949",
+      "role": "user"
     }
   ]
 }
