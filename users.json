@@ -29,6 +29,11 @@
       "username": "Nino",
       "password": "Lb080949",
       "role": "user"
+    },
+    {
+      "username": "buho",
+      "password": "nival",
+      "role": "user"
     }
   ]
 }
