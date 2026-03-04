@@ -1,909 +1,262 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-  <link rel="icon" href="https://media.tenor.com/kIhWscg5qmEAAAAj/akaruu-dance.gif">
-
-  <meta charset="UTF-8">
-  <title>tikbird</title>
-  <style>
-    body {
-      font-family: "JetBrains Mono", monospace;
-      background:#020202;
-      color:#00ff9c;
-      padding:20px;
-      max-width:1000px;
-      margin:auto;
-    }
-    body::before {
-      content:"";
-      position:fixed;
-      inset:0;
-      background:
-        radial-gradient(circle at 10% 20%, rgba(0,255,156,0.12) 0, transparent 50%),
-        radial-gradient(circle at 90% 80%, rgba(0,200,255,0.12) 0, transparent 55%),
-        repeating-linear-gradient(
-          rgba(0,255,150,0.05) 0px,
-          rgba(0,255,150,0.05) 1px,
-          transparent 1px,
-          transparent 3px
-        );
-      animation: matrix 2s linear infinite;
-      z-index:-1;
-    }
-    @keyframes matrix {
-      from { background-position:0 0, 0 0, 0 0; }
-      to   { background-position:0 10px, 0 0, 0 10px; }
-    }
-    h1 {
-      text-align:center;
-      color:#00ff9c;
-      margin-bottom:10px;
-      letter-spacing:3px;
-      font-size:30px;
-      text-shadow:0 0 8px #00ff9c88;
-    }
-    #subtitle {
-      text-align:center;
-      font-size:12px;
-      color:#00ff9c88;
-      margin-bottom:30px;
-    }
-    #loginBox {
-      max-width:340px;
-      margin:40px auto;
-      padding:25px 25px 18px;
-      background:#050505;
-      border:1px solid #00ff9c55;
-      border-radius:10px;
-      box-shadow:0 0 25px #00ff9c33;
-    }
-    #loginBox h2 {
-      margin-top:0;
-      font-size:16px;
-      text-transform:uppercase;
-      letter-spacing:2px;
-      color:#00ff9cdd;
-    }
-    #loginBox input {
-      width:100%;
-      padding:10px;
-      margin:10px 0;
-      background:#000;
-      color:#00ff9c;
-      border:1px solid #00ff9c55;
-      border-radius:5px;
-    }
-    #loginBox button {
-      width:100%;
-      padding:10px;
-      background:#00ff9c;
-      color:#000;
-      border:none;
-      border-radius:5px;
-      cursor:pointer;
-      font-weight:bold;
-      margin-top:5px;
-    }
-    #loginBox button:hover {
-      background:#00cc7a;
-    }
-    #loginMsg {
-      min-height:18px;
-      font-size:12px;
-      margin-top:6px;
-    }
-    #app { display:none; }
-
-    #top {
-      display:flex;
-      gap:10px;
-      justify-content:space-between;
-      align-items:center;
-      margin-bottom:15px;
-      flex-wrap:wrap;
-    }
-    #leftTop, #rightTop {
-      display:flex;
-      align-items:center;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-    #welcome {
-      font-size:13px;
-      color:#00ff9cbb;
-    }
-    .pill {
-      border-radius:999px;
-      border:1px solid #00ff9c55;
-      padding:4px 10px;
-      font-size:11px;
-      text-transform:uppercase;
-      letter-spacing:1px;
-    }
-    button, input[type="file"] {
-      padding:8px 12px;
-      border-radius:6px;
-      background:#050505;
-      color:#00ff9c;
-      border:1px solid #00ff9c55;
-      cursor:pointer;
-      transition:0.15s;
-      font-size:12px;
-    }
-    button:hover {
-      background:#00ff9c;
-      color:#000;
-      box-shadow:0 0 10px #00ff9c55;
-    }
-    input[type="file"]::-webkit-file-upload-button {
-      background:#00ff9c;
-      color:#000;
-      border:none;
-      padding:6px 10px;
-      margin-right:8px;
-      border-radius:4px;
-      cursor:pointer;
-    }
-    #adminPanel {
-      margin-bottom:15px;
-      padding:10px 12px;
-      border:1px solid #00ff9c55;
-      border-radius:8px;
-      background:#050505;
-      font-size:12px;
-    }
-    #adminPanel strong {
-      color:#00ff9c;
-      text-transform:uppercase;
-      letter-spacing:1px;
-      font-size:11px;
-    }
-    #adminPanel input {
-      padding:6px 8px;
-      font-size:11px;
-    }
-    #adminPanel button {
-      font-size:11px;
-      padding:6px 10px;
-    }
-
-    #gallery {
-      display:grid;
-      grid-template-columns:repeat(auto-fill, minmax(260px, 1fr));
-      gap:16px;
-      margin-top:10px;
-    }
-    .card {
-      background:#050505;
-      border:1px solid #00ff9c33;
-      border-radius:10px;
-      padding:8px;
-      box-shadow:0 0 12px #00ff9c22;
-      position:relative;
-      overflow:hidden;
-      display:flex;
-      flex-direction:column;
-      gap:6px;
-    }
-    .card img {
-      width:100%;
-      height:230px;
-      object-fit:cover;
-      border-radius:8px;
-      display:block;
-    }
-    .meta {
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      font-size:11px;
-      color:#00ff9caa;
-    }
-    .delete-btn {
-      border-radius:999px;
-      background:#ff4d4d;
-      color:#000;
-      border:none;
-      padding:3px 8px;
-      font-size:10px;
-      cursor:pointer;
-    }
-    .delete-btn:hover {
-      background:#ff8080;
-    }
-    .like-btn {
-      border-radius:999px;
-      background:#050505;
-      border:1px solid #00ff9c55;
-      padding:3px 8px;
-      font-size:11px;
-      cursor:pointer;
-      display:inline-flex;
-      align-items:center;
-      gap:4px;
-    }
-    .like-btn.liked {
-      background:#00ff9c;
-      color:#000;
-      box-shadow:0 0 10px #00ff9c55;
-    }
-    .comments {
-      border-top:1px solid #00ff9c22;
-      padding-top:6px;
-      margin-top:4px;
-      font-size:11px;
-    }
-    .comment {
-      margin-bottom:3px;
-      color:#00ff9cbb;
-    }
-    .comment strong {
-      color:#00ff9c;
-    }
-    .comment-form {
-      display:flex;
-      gap:4px;
-      margin-top:4px;
-    }
-    .comment-form input {
-      flex:1;
-      padding:4px 6px;
-      font-size:11px;
-      background:#000;
-      color:#00ff9c;
-      border:1px solid #00ff9c55;
-      border-radius:4px;
-    }
-    .comment-form button {
-      font-size:11px;
-      padding:4px 8px;
-    }
-  </style>
+<meta charset="UTF-8">
+<title>Tikbird Simple</title>
+<style>
+  body { font-family: Arial; background:#111; color:white; text-align:center; padding:20px; }
+  .box { background:#222; padding:20px; border-radius:10px; max-width:450px; margin:auto; }
+  input, button { width:100%; padding:10px; margin-top:10px; border-radius:8px; border:none; box-sizing:border-box; }
+  button { background:#4ade80; font-weight:bold; cursor:pointer; }
+  button.danger { background:#f87171; }
+  button.small { width:auto; padding:5px 8px; font-size:12px; margin-left:5px; }
+  img.post { max-width:100%; margin-top:10px; border-radius:10px; }
+  img.avatar { width:32px; height:32px; border-radius:50%; object-fit:cover; vertical-align:middle; margin-right:6px; }
+  .small { font-size:14px; color:#ccc; text-align:left; }
+  .post-item { text-align:left; margin-top:10px; padding:8px; background:#111; border-radius:8px; }
+  hr { border:none; border-top:1px solid #444; margin:15px 0; }
+</style>
 </head>
 <body>
 
-<h1>colimbo://mini-instagram</h1>
-<div id="subtitle">multiuser feed • likes • comments • github-backed</div>
+<div class="box" id="loginBox">
+  <h2>Tikbird</h2>
+  <p>Solo para mi hermana y yo</p>
 
-<div id="loginBox">
-  <h2>login_required</h2>
-  <input id="loginUser" placeholder="usuario">
-  <input id="loginPass" type="password" placeholder="contraseña">
-  <button onclick="login()">acceder</button>
-  <p id="loginMsg" style="color:#ff4d4d;"></p>
+  <h3>Iniciar sesión</h3>
+  <input id="user" placeholder="Usuario">
+  <input id="pass" type="password" placeholder="Contraseña">
+  <button onclick="login()">Entrar</button>
+  <p id="error" style="color:#f87171;"></p>
+
+  <hr>
+
+  <h3>Crear cuenta</h3>
+  <input id="newUser" placeholder="Nuevo usuario">
+  <input id="newPass" type="password" placeholder="Nueva contraseña">
+  <input type="file" id="newAvatar" accept="image/*">
+  <button onclick="crearCuenta()">Crear cuenta</button>
+  <p class="small">El avatar lo sube cada usuario al crear su cuenta.</p>
 </div>
 
-<div id="app">
-  <div id="top">
-    <div id="leftTop">
-      <span id="welcome"></span>
-      <button onclick="showProfile(currentUser)">perfil</button>
-      <span class="pill" id="rolePill"></span>
-    </div>
-    <div id="rightTop">
-      <input type="file" id="fileInput" accept="image/*">
-      <button onclick="upload()">subir</button>
-      <button onclick="logout()">salir</button>
-    </div>
+<div class="box" id="appBox" style="display:none;">
+  <h2>Bienvenido <span id="name"></span></h2>
+
+  <div id="adminPanel" style="display:none; text-align:left; margin-top:10px;">
+    <h3>Panel admin</h3>
+    <p class="small">Solo tú (admin) ves esto: cuentas y contraseñas.</p>
+    <div id="listaCuentas" class="small"></div>
   </div>
 
-  <div id="adminPanel" style="display:none;">
-    <strong>admin panel</strong>
-    <p>Solo tú puedes crear cuentas. Todos pueden borrar fotos. Feed compartido.</p>
-    <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:6px;">
-      <input id="newUser" placeholder="nuevo usuario">
-      <input id="newPass" type="password" placeholder="contraseña">
-      <select id="newRole">
-        <option value="user">user</option>
-        <option value="admin">admin</option>
-      </select>
-      <button onclick="createUser()">crear cuenta</button>
-      <span id="adminMsg" style="font-size:11px; color:#00ff9c88;"></span>
-    </div>
-  </div>
+  <hr>
 
-  <div id="gallery"></div>
+  <h3>Subir imagen</h3>
+  <input type="file" id="imgInput" accept="image/*">
+  <button onclick="subirImagen()">Subir imagen</button>
+
+  <hr>
+
+  <h3>Muro compartido</h3>
+  <div id="muro"></div>
+
+  <button class="danger" onclick="logout()">Cerrar sesión</button>
 </div>
 
 <script>
-const username = "colimbo67";
-const repo = "tikbird";
-const branch = "main";
+  const ADMIN_USER = "colimbo";
+  const ADMIN_PASS = "7600";
 
-let currentUser = null;
-let currentRole = null;
-let usersCache = null;
-let likesData = null;
-let likesSha = null;
-let commentsData = null;
-let commentsSha = null;
+  // Cuentas: { usuario: { pass, avatar } }
+  let cuentas = JSON.parse(localStorage.getItem("tikCuentas") || "{}");
 
-/* TOKEN */
-let token = localStorage.getItem("github_token");
-if (!token) {
-  token = prompt("token github:");
-  if (token) localStorage.setItem("github_token", token);
-}
-
-/* LOAD JSON HELPERS */
-async function loadJson(path) {
-  const res = await fetch(`https://api.github.com/repos/${username}/${repo}/contents/${path}`);
-  if (!res.ok) return null;
-  const data = await res.json();
-  const content = atob(data.content);
-  return { json: JSON.parse(content), sha: data.sha };
-}
-
-/* SAVE JSON HELPERS */
-async function saveJson(path, json, sha, message) {
-  const content = btoa(JSON.stringify(json, null, 2));
-  const res = await fetch(`https://api.github.com/repos/${username}/${repo}/contents/${path}`, {
-    method: "PUT",
-    headers: {
-      "Authorization": `token ${token}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      message,
-      content,
-      sha,
-      branch
-    })
-  });
-  if (!res.ok) return null;
-  return await res.json();
-}
-
-/* USERS */
-async function loadUsers() {
-  const data = await loadJson("users.json");
-  if (!data) {
-    console.error("No se pudo cargar users.json");
-    return null;
-  }
-  usersCache = data;
-  return data;
-}
-
-/* LIKES */
-async function loadLikes() {
-  const data = await loadJson("likes.json");
-  if (!data) return null;
-  likesData = data.json;
-  likesSha = data.sha;
-  if (!likesData.likes) likesData.likes = {};
-  return data;
-}
-
-/* COMMENTS */
-async function loadComments() {
-  const data = await loadJson("comments.json");
-  if (!data) return null;
-  commentsData = data.json;
-  commentsSha = data.sha;
-  if (!commentsData.comments) commentsData.comments = {};
-  return data;
-}
-
-/* LOGIN */
-async function login() {
-  const u = document.getElementById("loginUser").value.trim();
-  const p = document.getElementById("loginPass").value.trim();
-  const boxMsg = document.getElementById("loginMsg");
-  boxMsg.textContent = "";
-
-  const usersData = usersCache || await loadUsers();
-  if (!usersData) {
-    boxMsg.textContent = "error cargando usuarios";
-    return;
+  // Si no hay nada, creamos solo el admin
+  if (Object.keys(cuentas).length === 0) {
+    cuentas[ADMIN_USER] = { pass: ADMIN_PASS, avatar: null };
+    localStorage.setItem("tikCuentas", JSON.stringify(cuentas));
   }
 
-  const user = usersData.json.users.find(x => x.username === u && x.password === p);
-  if (!user) {
-    boxMsg.textContent = "credenciales inválidas";
-    return;
+  function guardarCuentas() {
+    localStorage.setItem("tikCuentas", JSON.stringify(cuentas));
   }
 
-  currentUser = user.username;
-  currentRole = user.role || "user";
-  localStorage.setItem("logged_user", currentUser);
-  localStorage.setItem("logged_role", currentRole);
-
-  enterApp();
-}
-
-/* ENTRAR A LA APP */
-function enterApp() {
-  document.getElementById("loginBox").style.display = "none";
-  document.getElementById("app").style.display = "block";
-  document.getElementById("welcome").textContent = `user: ${currentUser}`;
-  document.getElementById("rolePill").textContent = currentRole;
-
-  if (currentRole === "admin") {
-    document.getElementById("adminPanel").style.display = "block";
-  } else {
-    document.getElementById("adminPanel").style.display = "none";
+  function esAdmin(u) {
+    return u === ADMIN_USER;
   }
 
-  loadGallery();
-}
+  function crearCuenta() {
+    const u = newUser.value.trim();
+    const p = newPass.value.trim();
+    const file = newAvatar.files[0];
 
-/* AUTO INIT */
-(async function init() {
-  await loadUsers();
-  await loadLikes();
-  await loadComments();
-  await loadProfiles();
-  const savedUser = localStorage.getItem("logged_user");
-  const savedRole = localStorage.getItem("logged_role");
-  if (savedUser && savedRole) {
-    currentUser = savedUser;
-    currentRole = savedRole;
-    enterApp();
-  }
-})();
-
-/* LOGOUT */
-function logout() {
-  localStorage.removeItem("logged_user");
-  localStorage.removeItem("logged_role");
-  location.reload();
-}
-
-/* ADMIN: CREAR USUARIO */
-async function createUser() {
-  if (currentRole !== "admin") {
-    alert("solo admin puede crear cuentas");
-    return;
-  }
-  const u = document.getElementById("newUser").value.trim();
-  const p = document.getElementById("newPass").value.trim();
-  const r = document.getElementById("newRole").value;
-  const msg = document.getElementById("adminMsg");
-
-  if (!u || !p) {
-    msg.style.color = "#ff4d4d";
-    msg.textContent = "usuario y contraseña requeridos";
-    return;
-  }
-
-  const usersData = usersCache || await loadUsers();
-  if (!usersData) {
-    msg.style.color = "#ff4d4d";
-    msg.textContent = "error cargando usuarios";
-    return;
-  }
-
-  if (usersData.json.users.find(x => x.username === u)) {
-    msg.style.color = "#ff4d4d";
-    msg.textContent = "ese usuario ya existe";
-    return;
-  }
-
-  usersData.json.users.push({ username: u, password: p, role: r });
-  const saved = await saveJson("users.json", usersData.json, usersData.sha, `nuevo usuario ${u}`);
-  if (!saved) {
-    msg.style.color = "#ff4d4d";
-    msg.textContent = "error guardando usuario";
-    return;
-  }
-
-  usersCache.sha = saved.content.sha;
-  msg.style.color = "#00ff9c";
-  msg.textContent = `usuario ${u} creado (${r})`;
-  document.getElementById("newUser").value = "";
-  document.getElementById("newPass").value = "";
-}
-
-/* SUBIR FOTO */
-async function upload() {
-  if (isBanned(currentUser)) return alert("Estás baneado.");
-
-  if (!currentUser) {
-    alert("inicia sesión");
-    return;
-  }
-  const file = document.getElementById("fileInput").files[0];
-  if (!file) return alert("selecciona una imagen");
-
-  const reader = new FileReader();
-  reader.onloadend = async () => {
-    const content = reader.result.split(",")[1];
-    const filename = `images/${Date.now()}-${currentUser}-${file.name}`;
-
-    const res = await fetch(`https://api.github.com/repos/${username}/${repo}/contents/${filename}`, {
-      method: "PUT",
-      headers: {
-        "Authorization": `token ${token}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        message: `nueva imagen de ${currentUser}`,
-        content,
-        branch
-      })
-    });
-
-    if (!res.ok) {
-      alert("Error subiendo archivo. Revisa token o permisos.");
+    if (!u || !p) {
+      alert("Rellena usuario y contraseña");
       return;
     }
-    addLog("upload", filename);
+    if (cuentas[u]) {
+      alert("Ese usuario ya existe");
+      return;
+    }
 
-    loadGallery();
-  };
+    if (!file) {
+      cuentas[u] = { pass: p, avatar: null };
+      guardarCuentas();
+      newUser.value = "";
+      newPass.value = "";
+      newAvatar.value = "";
+      alert("Cuenta creada");
+      if (esAdmin(localStorage.getItem("tikUser"))) mostrarCuentasAdmin();
+      return;
+    }
 
-  reader.readAsDataURL(file);
-}
-
-/* BORRAR FOTO (todos pueden) */
-async function deleteImage(path, sha) {
-  if (!currentUser) {
-    alert("inicia sesión");
-    return;
-  }
-  addLog("delete", path);
-
-  const ok = confirm(`borrar ${path}?`);
-  if (!ok) return;
-
-  const res = await fetch(`https://api.github.com/repos/${username}/${repo}/contents/${path}`, {
-    method: "DELETE",
-    headers: {
-      "Authorization": `token ${token}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      message: `borrar imagen ${path} por ${currentUser}`,
-      sha,
-      branch
-    })
-  });
-
-  if (!res.ok) {
-    alert("error borrando imagen");
-    return;
-  }
-
-  // limpiar likes y comentarios de esa imagen
-  const key = path.split("/").pop();
-  if (likesData && likesData.likes && likesData.likes[key]) {
-    delete likesData.likes[key];
-    const savedLikes = await saveJson("likes.json", likesData, likesSha, `limpiar likes de ${key}`);
-    if (savedLikes) likesSha = savedLikes.content.sha;
-  }
-  if (commentsData && commentsData.comments && commentsData.comments[key]) {
-    delete commentsData.comments[key];
-    const savedComments = await saveJson("comments.json", commentsData, commentsSha, `limpiar comments de ${key}`);
-    if (savedComments) commentsSha = savedComments.content.sha;
-  }
-
-  loadGallery();
-}
-
-/* LIKE / UNLIKE */
-async function toggleLike(imageKey) {
-  if (isBanned(currentUser)) return alert("Estás baneado.");
-
-  if (!currentUser) {
-    alert("inicia sesión");
-    return;
-  }
-  if (!likesData) {
-    await loadLikes();
-  }
-  if (!likesData.likes[imageKey]) likesData.likes[imageKey] = [];
-
-  const list = likesData.likes[imageKey];
-  const idx = list.indexOf(currentUser);
-  if (idx === -1) {
-    list.push(currentUser);
-  } else {
-    list.splice(idx, 1);
-  }
-
-  const saved = await saveJson("likes.json", likesData, likesSha, `update likes ${imageKey}`);
-  if (saved) likesSha = saved.content.sha;
-
-  loadGallery();
-}
-
-/* AÑADIR COMENTARIO */
-async function addComment(imageKey, inputId) {
-  if (isBanned(currentUser)) return alert("Estás baneado.");
-
-  if (!currentUser) {
-    alert("inicia sesión");
-    return;
-  }
-  const input = document.getElementById(inputId);
-  const text = input.value.trim();
-  if (!text) return;
-
-  if (!commentsData) {
-    await loadComments();
-  }
-  if (!commentsData.comments[imageKey]) commentsData.comments[imageKey] = [];
-
-  commentsData.comments[imageKey].push({
-    user: currentUser,
-    text,
-    date: Date.now()
-  });
-
-  const saved = await saveJson("comments.json", commentsData, commentsSha, `nuevo comment en ${imageKey}`);
-  if (saved) commentsSha = saved.content.sha;
-
-  input.value = "";
-  loadGallery();
-}
-
-/* GALERÍA */
-async function loadGallery() {
-  const res = await fetch(`https://api.github.com/repos/${username}/${repo}/contents/images`);
-  if (!res.ok) return;
-
-  const files = await res.json();
-  const gallery = document.getElementById("gallery");
-  gallery.innerHTML = "";
-
-  files
-    .filter(f => f.type === "file")
-    .sort((a,b) => a.name.localeCompare(b.name))
-    .reverse()
-    .forEach(f => {
-      const card = document.createElement("div");
-      card.className = "card";
-      const img = document.createElement("img");
-      img.src = f.download_url;
-      card.appendChild(img);
-
-      const imageKey = f.name;
-      const uploader = f.name.split("-")[1] || "unknown";
-
-      // meta (uploader + borrar + likes)
-      const meta = document.createElement("div");
-      meta.className = "meta";
-
-      const left = document.createElement("span");
-      left.textContent = `by ${uploader}`;
-
-      const right = document.createElement("div");
-      right.style.display = "flex";
-      right.style.gap = "6px";
-      right.style.alignItems = "center";
-
-      // likes
-      const likesForImage = (likesData && likesData.likes && likesData.likes[imageKey]) ? likesData.likes[imageKey] : [];
-      const likedByMe = likesForImage.includes(currentUser);
-      const likeBtn = document.createElement("button");
-      likeBtn.className = "like-btn" + (likedByMe ? " liked" : "");
-      likeBtn.innerHTML = `❤ ${likesForImage.length}`;
-      likeBtn.onclick = () => toggleLike(imageKey);
-      right.appendChild(likeBtn);
-
-      // borrar
-      const btn = document.createElement("button");
-      btn.textContent = "borrar";
-      btn.className = "delete-btn";
-      btn.onclick = () => deleteImage(f.path, f.sha);
-      right.appendChild(btn);
-
-      meta.appendChild(left);
-      meta.appendChild(right);
-      card.appendChild(meta);
-
-      // comentarios
-      const commentsBox = document.createElement("div");
-      commentsBox.className = "comments";
-
-      const list = (commentsData && commentsData.comments && commentsData.comments[imageKey]) ? commentsData.comments[imageKey] : [];
-      list.forEach(c => {
-        const div = document.createElement("div");
-        div.className = "comment";
-        div.innerHTML = `<strong>${c.user}</strong>: ${c.text}`;
-        commentsBox.appendChild(div);
-      });
-
-      const form = document.createElement("div");
-      form.className = "comment-form";
-      const inputId = `comment-${imageKey}`;
-      const input = document.createElement("input");
-      input.id = inputId;
-      input.placeholder = "añadir comentario...";
-      const sendBtn = document.createElement("button");
-      sendBtn.textContent = "enviar";
-      sendBtn.onclick = () => addComment(imageKey, inputId);
-      form.appendChild(input);
-      form.appendChild(sendBtn);
-
-      commentsBox.appendChild(form);
-      card.appendChild(commentsBox);
-
-      gallery.appendChild(card);
-    });
-}
-  /* ============================
-      PERFILES
-============================ */
-
-let profilesData = null;
-let profilesSha = null;
-
-/* Cargar perfiles */
-async function loadProfiles() {
-  const data = await loadJson("profiles.json");
-  if (!data) return null;
-  profilesData = data.json;
-  profilesSha = data.sha;
-  if (!profilesData.profiles) profilesData.profiles = {};
-  return data;
-}
-
-/* Guardar perfiles */
-async function saveProfiles() {
-  const saved = await saveJson("profiles.json", profilesData, profilesSha, "update profiles");
-  if (saved) profilesSha = saved.content.sha;
-}
-
-/* Obtener perfil */
-function getProfile(user) {
-  if (!profilesData || !profilesData.profiles[user]) {
-    profilesData.profiles[user] = {
-      avatar: "",
-      bio: "",
-      color: "#00ff9c",
-      created: Date.now()
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      cuentas[u] = { pass: p, avatar: e.target.result };
+      guardarCuentas();
+      newUser.value = "";
+      newPass.value = "";
+      newAvatar.value = "";
+      alert("Cuenta creada");
+      if (esAdmin(localStorage.getItem("tikUser"))) mostrarCuentasAdmin();
     };
+    reader.readAsDataURL(file);
   }
-  return profilesData.profiles[user];
-}
 
-/* Mostrar perfil */
-function showProfile(user) {
-  const p = getProfile(user);
+  function login() {
+    const u = user.value.trim();
+    const p = pass.value.trim();
 
-  const html = `
-    <div style="padding:20px;">
-      <h2 style="color:${p.color};">perfil:// ${user}</h2>
-      <img src="${p.avatar || "https://via.placeholder.com/120"}" style="width:120px;height:120px;border-radius:50%;border:2px solid ${p.color};">
-      <p><strong>bio:</strong> ${p.bio || "(vacío)"}</p>
-      <p><strong>creado:</strong> ${new Date(p.created).toLocaleString()}</p>
-      ${user === currentUser ? `
-        <button onclick="editProfile()">editar perfil</button>
-      ` : ""}
-      <button onclick="closeProfile()">cerrar</button>
-    </div>
-  `;
-
-  const box = document.createElement("div");
-  box.id = "profileBox";
-  box.style.position = "fixed";
-  box.style.top = "0";
-  box.style.left = "0";
-  box.style.width = "100%";
-  box.style.height = "100%";
-  box.style.background = "rgba(0,0,0,0.9)";
-  box.style.color = "#00ff9c";
-  box.style.zIndex = "9999";
-  box.style.overflow = "auto";
-  box.innerHTML = html;
-
-  document.body.appendChild(box);
-}
-
-/* Cerrar perfil */
-function closeProfile() {
-  const box = document.getElementById("profileBox");
-  if (box) box.remove();
-}
-
-/* Editar perfil */
-function editProfile() {
-  const p = getProfile(currentUser);
-
-  const html = `
-    <div style="padding:20px;">
-      <h2 style="color:${p.color};">editar perfil</h2>
-
-      <label>avatar (URL):</label>
-      <input id="editAvatar" value="${p.avatar}" style="width:100%;padding:6px;margin-bottom:10px;">
-
-      <label>bio:</label>
-      <input id="editBio" value="${p.bio}" style="width:100%;padding:6px;margin-bottom:10px;">
-
-      <label>color:</label>
-      <input id="editColor" type="color" value="${p.color}" style="width:100%;padding:6px;margin-bottom:10px;">
-
-      <button onclick="saveProfile()">guardar</button>
-      <button onclick="closeProfile()">cancelar</button>
-    </div>
-  `;
-
-  document.getElementById("profileBox").innerHTML = html;
-}
-
-/* Guardar cambios */
-async function saveProfile() {
-  const p = getProfile(currentUser);
-
-  p.avatar = document.getElementById("editAvatar").value.trim();
-  p.bio = document.getElementById("editBio").value.trim();
-  p.color = document.getElementById("editColor").value;
-
-  await saveProfiles();
-  closeProfile();
-}
-/* ============================
-      LOGS
-============================ */
-
-let logsData = null;
-let logsSha = null;
-
-async function loadLogs() {
-  const data = await loadJson("logs.json");
-  if (!data) return null;
-  logsData = data.json;
-  logsSha = data.sha;
-  if (!logsData.logs) logsData.logs = [];
-  return data;
-}
-
-async function saveLogs() {
-  const saved = await saveJson("logs.json", logsData, logsSha, "update logs");
-  if (saved) logsSha = saved.content.sha;
-}
-
-function addLog(action, details = "") {
-  if (!logsData) return;
-  logsData.logs.push({
-    user: currentUser || "unknown",
-    action,
-    details,
-    time: Date.now()
-  });
-  saveLogs();
-}
-/* ============================
-      BANEOS
-============================ */
-
-let bansData = null;
-let bansSha = null;
-
-async function loadBans() {
-  const data = await loadJson("bans.json");
-  if (!data) return null;
-  bansData = data.json;
-  bansSha = data.sha;
-  if (!bansData.bans) bansData.bans = [];
-  return data;
-}
-
-async function saveBans() {
-  const saved = await saveJson("bans.json", bansData, bansSha, "update bans");
-  if (saved) bansSha = saved.content.sha;
-}
-
-function isBanned(user) {
-  return bansData && bansData.bans.includes(user);
-}
-
-async function banUser(user) {
-  if (!bansData.bans.includes(user)) {
-    bansData.bans.push(user);
-    await saveBans();
-    addLog("ban", user);
+    if (cuentas[u] && cuentas[u].pass === p) {
+      localStorage.setItem("tikUser", u);
+      mostrarApp();
+    } else {
+      error.textContent = "Datos incorrectos";
+    }
   }
-}
 
-async function unbanUser(user) {
-  bansData.bans = bansData.bans.filter(u => u !== user);
-  await saveBans();
-  addLog("unban", user);
-}
+  function mostrarApp() {
+    const u = localStorage.getItem("tikUser");
+    if (!u) return;
 
+    loginBox.style.display = "none";
+    appBox.style.display = "block";
+    name.textContent = u;
+
+    if (esAdmin(u)) {
+      adminPanel.style.display = "block";
+      mostrarCuentasAdmin();
+    } else {
+      adminPanel.style.display = "none";
+    }
+
+    cargarMuro();
+  }
+
+  function logout() {
+    localStorage.removeItem("tikUser");
+    location.reload();
+  }
+
+  function mostrarCuentasAdmin() {
+    listaCuentas.innerHTML = "";
+    for (let u in cuentas) {
+      const info = cuentas[u];
+      const div = document.createElement("div");
+      div.innerHTML =
+        "<strong>" + u + "</strong> : " + info.pass +
+        (u === ADMIN_USER ? " (admin)" : "") +
+        " <button class='small danger' onclick=\"borrarCuenta('" + u + "')\">Borrar</button>";
+      listaCuentas.appendChild(div);
+    }
+  }
+
+  function borrarCuenta(u) {
+    if (u === ADMIN_USER) {
+      alert("No puedes borrar la cuenta admin");
+      return;
+    }
+    if (!confirm("¿Borrar la cuenta " + u + "?")) return;
+    delete cuentas[u];
+    guardarCuentas();
+    mostrarCuentasAdmin();
+  }
+
+  // Imágenes: array de { src, user }
+  function subirImagen() {
+    const file = imgInput.files[0];
+    const u = localStorage.getItem("tikUser");
+    if (!u) {
+      alert("Inicia sesión");
+      return;
+    }
+    if (!file) {
+      alert("Elige una imagen");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const lista = JSON.parse(localStorage.getItem("tikImgs") || "[]");
+      lista.push({ src: e.target.result, user: u });
+      localStorage.setItem("tikImgs", JSON.stringify(lista));
+      imgInput.value = "";
+      cargarMuro();
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function borrarImagen(index) {
+    const u = localStorage.getItem("tikUser");
+    if (!esAdmin(u)) {
+      alert("Solo el admin puede borrar imágenes");
+      return;
+    }
+    const lista = JSON.parse(localStorage.getItem("tikImgs") || "[]");
+    if (!lista[index]) return;
+    if (!confirm("¿Borrar esta imagen?")) return;
+    lista.splice(index, 1);
+    localStorage.setItem("tikImgs", JSON.stringify(lista));
+    cargarMuro();
+  }
+
+  function cargarMuro() {
+    const lista = JSON.parse(localStorage.getItem("tikImgs") || "[]");
+    const u = localStorage.getItem("tikUser");
+    const admin = esAdmin(u);
+    muro.innerHTML = "";
+
+    lista.forEach((item, idx) => {
+      const cont = document.createElement("div");
+      cont.className = "post-item";
+
+      const avatarSrc = cuentas[item.user] && cuentas[item.user].avatar
+        ? cuentas[item.user].avatar
+        : "";
+
+      let headerHTML = "";
+      if (avatarSrc) {
+        headerHTML += "<img class='avatar' src='" + avatarSrc + "'>";
+      } else {
+        headerHTML += "<span style='display:inline-block;width:32px;height:32px;border-radius:50%;background:#444;line-height:32px;text-align:center;font-size:14px;margin-right:6px;'>" +
+                      (item.user[0] || "?").toUpperCase() + "</span>";
+      }
+      headerHTML += "<strong>" + item.user + "</strong>";
+
+      if (admin) {
+        headerHTML += " <button class='small danger' onclick='borrarImagen(" + idx + ")'>Borrar</button>";
+      }
+
+      cont.innerHTML = headerHTML + "<br>";
+      const img = document.createElement("img");
+      img.className = "post";
+      img.src = item.src;
+      cont.appendChild(img);
+
+      muro.prepend(cont);
+    });
+  }
+
+  // Si ya estaba logueado
+  mostrarApp();
 </script>
 
 </body>
